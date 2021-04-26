@@ -107,7 +107,9 @@ private:
     // Used to remember initial poses for soft reset
     std::vector<Stg::Pose> initial_poses;
     ros::ServiceServer reset_srv_;
-  
+    // Service for pausing sim
+    ros::ServiceServer pause_srv_;
+
     ros::Publisher clock_pub_;
     
     bool isDepthCanonical;
@@ -170,6 +172,9 @@ public:
 
     // Service callback for soft reset
     bool cb_reset_srv(std_srvs::Empty::Request& request, std_srvs::Empty::Response& response);
+
+    // Service callback for pause
+    bool cb_pause_srv(std_srvs::Empty::Request& request, std_srvs::Empty::Response& response);
 
     // The main simulator object
     Stg::World* world;
@@ -265,6 +270,12 @@ StageNode::cb_reset_srv(std_srvs::Empty::Request& request, std_srvs::Empty::Resp
   return true;
 }
 
+bool
+StageNode::cb_pause_srv(std_srvs::Empty::Request& request, std_srvs::Empty::Response& response)
+{
+  this->world->UpdateAll();
+  return true;
+}
 
 
 void
@@ -414,6 +425,9 @@ StageNode::SubscribeModels()
 
     // advertising reset service
     reset_srv_ = n_.advertiseService("reset_positions", &StageNode::cb_reset_srv, this);
+
+    // advertising reset service
+    pause_srv_ = n_.advertiseService("pause_sim", &StageNode::cb_pause_srv, this);
 
     return(0);
 }
