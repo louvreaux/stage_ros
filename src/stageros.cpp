@@ -109,6 +109,7 @@ private:
     ros::ServiceServer reset_srv_;
     // Service for pausing sim
     ros::ServiceServer pause_srv_;
+    ros::ServiceServer unpause_srv_;
 
     ros::Publisher clock_pub_;
     
@@ -175,6 +176,9 @@ public:
 
     // Service callback for pause
     bool cb_pause_srv(std_srvs::Empty::Request& request, std_srvs::Empty::Response& response);
+
+    // Service callback for unpause
+    bool cb_unpause_srv(std_srvs::Empty::Request& request, std_srvs::Empty::Response& response);
 
     // The main simulator object
     Stg::World* world;
@@ -273,9 +277,17 @@ StageNode::cb_reset_srv(std_srvs::Empty::Request& request, std_srvs::Empty::Resp
 bool
 StageNode::cb_pause_srv(std_srvs::Empty::Request& request, std_srvs::Empty::Response& response)
 {
-  this->world->UpdateAll();
+  this->world->Start();
   return true;
 }
+
+bool
+StageNode::cb_unpause_srv(std_srvs::Empty::Request& request, std_srvs::Empty::Response& response)
+{
+  this->world->Stop();
+  return true;
+}
+
 
 
 void
@@ -428,6 +440,7 @@ StageNode::SubscribeModels()
 
     // advertising reset service
     pause_srv_ = n_.advertiseService("pause_sim", &StageNode::cb_pause_srv, this);
+    unpause_srv_ = n_.advertiseService("unpause_sim", &StageNode::cb_unpause_srv, this);
 
     return(0);
 }
