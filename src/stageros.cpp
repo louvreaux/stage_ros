@@ -65,6 +65,10 @@
 #define CMD_VEL "cmd_vel"
 #define CMD_POSE "cmd_pose"
 
+#define SHELLSCRIPT "\
+#/bin/bash \n\
+xdotool key --window \"$(wmctrl -l | grep \"Stage (ROS)\" | cut -c 1-10)\" p \n\
+"
 // Our node
 class StageNode
 {
@@ -277,14 +281,14 @@ StageNode::cb_reset_srv(std_srvs::Empty::Request& request, std_srvs::Empty::Resp
 bool
 StageNode::cb_pause_srv(std_srvs::Empty::Request& request, std_srvs::Empty::Response& response)
 {
-  this->world->Start();
+  system(SHELLSCRIPT);
   return true;
 }
 
 bool
 StageNode::cb_unpause_srv(std_srvs::Empty::Request& request, std_srvs::Empty::Response& response)
 {
-  this->world->Stop();
+  system(SHELLSCRIPT);
   return true;
 }
 
@@ -465,7 +469,7 @@ StageNode::WorldCallback()
     this->world->QuitAll();
     return;
   }
-  
+
     boost::mutex::scoped_lock lock(msg_lock);
 
     this->sim_time.fromSec(world->SimTimeNow() / 1e6);
